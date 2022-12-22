@@ -1,9 +1,5 @@
 # MySQL Fake Server
-[ENGLISH](README_EN.md)|简体中文
-
-用于渗透测试过程中的假MySQL服务器，纯原生python3实现，不依赖其它包。
-
-修改自项目https://github.com/waldiTM/python-mysqlproto
+修改自项目：https://github.com/fnmsd/MySQL_Fake_Server
 
 ## 用途
 

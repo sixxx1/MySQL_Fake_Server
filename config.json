@@ -18,5 +18,8 @@
     },
     "yso":{
         "Jdk7u21":["Jdk7u21","calc"]
+    },
+    "dnslog":{
+        "t1":"test.dnslog.cn"
     }
 }
